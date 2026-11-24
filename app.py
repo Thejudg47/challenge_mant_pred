@@ -9,10 +9,12 @@ from datetime import datetime
 def cargar_modelo():
     return joblib.load("modelo_mantenimiento.pkl")
 
+# funcion para cargar api una sola vez
 @st.cache_resource
 def obtener_api_groq():
     return Groq(api_key=st.secrets["GROQ_API_KEY"])
 
+# extraccion de la api
 try:
     client = obtener_api_groq()
 except Exception as e:
@@ -42,7 +44,7 @@ def detectar_modelo_chat():
             
     return modelos_chat[0]
 
-# Configuración básica de página (opcional, mejora la visualización en 4 columnas)
+# Configuración básica de página
 st.set_page_config(page_title="Mantenimiento Predictivo", layout="wide")
 # Cargar modelo
 modelo = cargar_modelo()
@@ -84,7 +86,7 @@ presion_psi = st.sidebar.slider(
     step=1.0
 )
 
-# 3. Mostrar las lecturas actuales mediante tarjetas visuales st.metric en 4 columnas
+# Mostrar las lecturas actuales mediante tarjetas visuales st.metric en 4 columnas
 st.subheader("Lecturas actuales de los sensores")
 col1, col2, col3, col4 = st.columns(4)
 
@@ -110,7 +112,7 @@ datos_sensores = pd.DataFrame([{
     "presion_psi": presion_psi
 }])
 
-# 4. Mostrar alertas diferenciadas (0, 1 o 2) junto con predict_proba()
+# Mostrar alertas diferenciadas (0, 1 o 2) junto con predict_proba()
 st.subheader("Diagnóstico del equipo")
 
 prediccion = int(modelo.predict(datos_sensores)[0])
