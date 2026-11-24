@@ -22,17 +22,24 @@ except Exception as e:
 @st.cache_data(ttl=3600)
 def detectar_modelo_chat():
     modelos_disponibles = client.models.list().data
-    # Filtrar modelos activos descartando los de audio (whisper) o moderación (guard)
+    
+    # Palabras clave de modelos que NO son de chat general
+    excluidos = ("whisper", "guard", "orpheus", "tts", "vision", "embed")
+    # Familias de modelos de texto/chat soportadas en Groq
+    familias_chat = ("llama", "qwen", "gemma", "deepseek", "mistral", "gpt-oss")
+    
     modelos_chat = [
         m.id for m in modelos_disponibles
         if getattr(m, "active", True)
-        and "whisper" not in m.id.lower()
-        and "guard" not in m.id.lower()
+        and not any(ex in m.id.lower() for ex in excluidos)
+        and any(fam in m.id.lower() for fam in familias_chat)
     ]
-    # Priorizar modelos de texto conocidos si están en la lista activa
-    for preferido in ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"]:
+    
+    # Priorizar modelos de chat general potentes si están disponibles
+    for preferido in ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]:
         if preferido in modelos_chat:
             return preferido
+            
     return modelos_chat[0]
 
 # Configuración básica de página (opcional, mejora la visualización en 4 columnas)
